@@ -78,8 +78,17 @@ window.leafletBlazor = {
         addLayer(mapId, mkr, marker.id);
         setTooltipAndPopupIfDefined(marker, mkr);
     },
+    addPopupLayer: function (mapId, popup, objectReference) {
+        var js_popup = buildPopup(popup,objectReference);
+        addLayer(mapId, js_popup, popup.id);
+    },
+    openPopupOnMap: function (mapId, popup, objectReference) {
+        var js_popup = buildPopup(popup,objectReference);
+        js_popup.openOn(maps[mapId]);
+    },
     addPolyline: function (mapId, polyline, objectReference) {
         const layer = L.polyline(shapeToLatLngArray(polyline.shape), createPolyline(polyline));
+        connectInteractiveLayerEvents(layer, objectReference);
         addLayer(mapId, layer, polyline.id);
         setTooltipAndPopupIfDefined(polyline, layer);
     },
@@ -326,9 +335,8 @@ function addTooltip(layerObj, tooltip) {
             opacity: tooltip.opacity
         });
 }
-
-function addPopup(layerObj, popup) {
-    layerObj.bindPopup(popup.content, {
+function buildPopupOptions(popup) {
+    return {
         pane: popup.pane,
         className: popup.className,
         maxWidth: popup.maximumWidth,
@@ -341,7 +349,24 @@ function addPopup(layerObj, popup) {
         closeButton: popup.showCloseButton,
         autoClose: popup.autoClose,
         closeOnEscapeKey: popup.closeOnEscapeKey,
-    });
+    };
+}
+function addPopup(layerObj, popup) {
+    layerObj.bindPopup(popup.content, buildPopupOptions(popup));
+}
+
+function buildPopup(popup, objectReference) {
+    var options = {
+        ...createLayer(popup),
+        ...buildPopupOptions(popup)
+    };
+
+    const js_popup = L.popup(options)
+        .setLatLng(popup.position)
+        .setContent(popup.content);
+    connectInteractiveLayerEvents(js_popup, objectReference);
+
+    return js_popup;
 }
 
 function addLayer(mapId, layer, layerId) {

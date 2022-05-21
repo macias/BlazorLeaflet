@@ -303,5 +303,10 @@ namespace BlazorLeaflet
         public void NotifyContextMenu(MouseEvent eventArgs) => OnContextMenu?.Invoke(this, eventArgs);
 
         #endregion InteractiveLayerEvents
+
+        public ValueTask OpenPopupAsync(Popup popup)
+        {
+            return LeafletInterops.OpenPopupOnMapAsync(this._jsRuntime, this.Id,popup);
+        }
     }
 }

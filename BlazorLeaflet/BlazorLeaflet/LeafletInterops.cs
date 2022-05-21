@@ -38,6 +38,7 @@ namespace BlazorLeaflet
         {
             return layer switch
             {
+                Popup popupLayer => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addPopupLayer", mapId, popupLayer, CreateLayerReference(mapId, popupLayer)),
                 TileLayer tileLayer => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addTilelayer", mapId, tileLayer, CreateLayerReference(mapId, tileLayer)),
                 MbTilesLayer mbTilesLayer => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addMbTilesLayer", mapId, mbTilesLayer, CreateLayerReference(mapId, mbTilesLayer)),
                 ShapefileLayer shapefileLayer => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addShapefileLayer", mapId, shapefileLayer, CreateLayerReference(mapId, shapefileLayer)),
@@ -52,6 +53,10 @@ namespace BlazorLeaflet
             };
         }
 
+        public static ValueTask OpenPopupOnMapAsync(IJSRuntime jsRuntime, string mapId, Popup popup)
+        {
+            return jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.openPopupOnMap", mapId, popup, CreateLayerReference(mapId, popup));
+        }
         public static async ValueTask RemoveLayer(IJSRuntime jsRuntime, string mapId, string layerId)
         {
             await jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.removeLayer", mapId, layerId);
@@ -91,5 +96,6 @@ namespace BlazorLeaflet
 
         public static ValueTask ZoomOut(IJSRuntime jsRuntime, string mapId, MouseEventArgs e) =>
             jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.zoomOut", mapId, e);
+
     }
 }

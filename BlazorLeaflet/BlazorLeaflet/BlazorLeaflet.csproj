@@ -15,6 +15,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression></PackageLicenseExpression>
     <LangVersion>8</LangVersion>
+    <PackageVersion>0.4.1</PackageVersion>
   </PropertyGroup>
 
 

@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Threading.Tasks;
 
 namespace BlazorLeaflet.Models
 {
@@ -7,6 +8,8 @@ namespace BlazorLeaflet.Models
 
         public override string Pane => "popupPane";
 
+        public LatLng Position { get; set; }
+        
         /// <summary>
         /// Max width of the popup, in pixels.
         /// </summary>
@@ -67,5 +70,9 @@ namespace BlazorLeaflet.Models
         /// </summary>
         public string Content { get; set; }
 
+        public ValueTask OpenOnAsync(Map map)
+        {
+            return map.OpenPopupAsync(this);
+        }
     }
 }
