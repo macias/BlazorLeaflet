@@ -74,5 +74,10 @@ namespace BlazorLeaflet.Models
         {
             return map.OpenPopupAsync(this);
         }
+        public ValueTask CloseAsync(Map map)
+        {
+            return map.ClosePopupAsync(this);
+        }
+
     }
 }

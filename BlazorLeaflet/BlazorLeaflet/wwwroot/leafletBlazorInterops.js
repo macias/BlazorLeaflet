@@ -85,6 +85,11 @@ window.leafletBlazor = {
     openPopupOnMap: function (mapId, popup, objectReference) {
         var js_popup = buildPopup(popup,objectReference);
         js_popup.openOn(maps[mapId]);
+        registerLayer(mapId, js_popup, popup.id);
+    },
+    closePopupOnMap: function (mapId, popup) {
+        maps[mapId].closePopup();
+        unregisterLayer(mapId, popup.id);
     },
     addPolyline: function (mapId, polyline, objectReference) {
         const layer = L.polyline(shapeToLatLngArray(polyline.shape), createPolyline(polyline));
@@ -369,9 +374,21 @@ function buildPopup(popup, objectReference) {
     return js_popup;
 }
 
-function addLayer(mapId, layer, layerId) {
+function unregisterLayer(mapId, layerId) {
+    let layer_idx = layers[mapId].findIndex(l => l.id === layerId);
+    if (layer_idx === -1)
+        throw 'Cannot unregister, layer not found';
+
+    layers[mapId].splice(layer_idx,1);
+}
+
+function registerLayer(mapId, layer, layerId) {
     layer.id = layerId;
     layers[mapId].push(layer);
+}
+
+function addLayer(mapId, layer, layerId) {
+    registerLayer(mapId, layer, layerId);
     layer.addTo(maps[mapId]);
 }
 

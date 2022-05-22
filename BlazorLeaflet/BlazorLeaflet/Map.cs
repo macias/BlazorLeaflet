@@ -308,5 +308,9 @@ namespace BlazorLeaflet
         {
             return LeafletInterops.OpenPopupOnMapAsync(this._jsRuntime, this.Id,popup);
         }
+        public ValueTask ClosePopupAsync(Popup popup)
+        {
+            return LeafletInterops.ClosePopupOnMapAsync(this._jsRuntime, this.Id,popup);
+        }
     }
 }

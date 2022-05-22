@@ -49,13 +49,18 @@ namespace BlazorLeaflet
                 Polyline polyline => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addPolyline", mapId, polyline, CreateLayerReference(mapId, polyline)),
                 ImageLayer image => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addImageLayer", mapId, image, CreateLayerReference(mapId, image)),
                 GeoJsonDataLayer geo => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addGeoJsonLayer", mapId, geo, CreateLayerReference(mapId, geo)),
-                _ => throw new NotImplementedException($"The layer {typeof(Layer).Name} has not been implemented."),
+                _ => throw new NotImplementedException($"The layer {layer.GetType().Name} has not been implemented."),
             };
         }
 
         public static ValueTask OpenPopupOnMapAsync(IJSRuntime jsRuntime, string mapId, Popup popup)
         {
             return jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.openPopupOnMap", mapId, popup, CreateLayerReference(mapId, popup));
+        }
+        public static async ValueTask ClosePopupOnMapAsync(IJSRuntime jsRuntime, string mapId, Popup popup)
+        {
+            await jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.closePopupOnMap", mapId, popup);
+            DisposeLayerReference(popup.Id);
         }
         public static async ValueTask RemoveLayer(IJSRuntime jsRuntime, string mapId, string layerId)
         {
