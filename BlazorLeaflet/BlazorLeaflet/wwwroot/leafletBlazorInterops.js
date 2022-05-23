@@ -1,5 +1,10 @@
 ﻿maps = {};
 layers = {};
+// when passing objects Blazor kills polymorphism
+// and on the other hand I cannot pass back and forth object:
+// https://stackoverflow.com/questions/72351350/how-to-get-js-object-and-pass-it-back
+// so, Forth-way...
+interop_stack = [];
 
 window.leafletBlazor = {
     create: function (map, objectReference) {
@@ -52,6 +57,20 @@ window.leafletBlazor = {
         const layer = L.shapefile(shapefileLayer.urlTemplate);
         addLayer(mapId, layer, shapefileLayer.id);
     },
+    pushNull: function () {
+        interop_stack.push(null);
+    },
+    pushIcon: function (icon) {
+        interop_stack.push(L.icon(buildIconOptions(icon)));
+    },
+    pushDivIcon: function (icon) {
+        let result = L.divIcon({
+            ...buildIconOptions(icon),
+            bgPos: icon.bgPos ? L.point(icon.bgPos.x, icon.bgPos.y) : null,
+            html:icon.html,
+        });
+        interop_stack.push(result);
+    },
     addMarker: function (mapId, marker, objectReference) {
         var options = {
             ...createInteractiveLayer(marker),
@@ -67,12 +86,12 @@ window.leafletBlazor = {
             draggable: marker.draggable,
             autoPan: marker.useAutopan,
             autoPanPadding: marker.autoPanPadding,
-            autoPanSpeed: marker.autoPanSpeed
+            autoPanSpeed: marker.autoPanSpeed,
         };
 
-        if (marker.icon !== null) {
-            options.icon = createIcon(marker.icon);
-        }
+        // make this more visible in code
+        options.icon = interop_stack.pop();
+
         const mkr = L.marker(marker.position, options);
         connectMarkerEvents(mkr, objectReference);
         addLayer(mapId, mkr, marker.id);
@@ -238,21 +257,23 @@ window.leafletBlazor = {
     }
 };
 
-function createIcon(icon) {
-    return L.icon({
+function buildIconOptions(icon) {
+    let result =  {
         iconUrl: icon.url,
         iconRetinaUrl: icon.retinaUrl,
-        iconSize: icon.size ? L.point(icon.size.value.width, icon.size.value.height) : null,
-        iconAnchor: icon.anchor ? L.point(icon.anchor.value.x, icon.anchor.value.y) : null,
-        popupAnchor: L.point(icon.popupAnchor.x, icon.popupAnchor.y),
-        tooltipAnchor: L.point(icon.tooltipAnchor.x, icon.tooltipAnchor.y),
+        iconSize: icon.size ? L.point(icon.size.width, icon.size.height) : null,
+        iconAnchor: icon.anchor ? L.point(icon.anchor.x, icon.anchor.y) : null,
+        popupAnchor: icon.popupAnchor ? L.point(icon.popupAnchor.x, icon.popupAnchor.y) : L.point(0, 0),
+        tooltipAnchor: icon.tooltipAnchor ? L.point(icon.tooltipAnchor.x, icon.tooltipAnchor.y): L.point(0, 0),
         shadowUrl: icon.shadowUrl,
         shadowRetinaUrl: icon.shadowRetinaUrl,
         shadowSize: icon.shadowSize ? L.point(icon.shadowSize.value.width, icon.shadowSize.value.height) : null,
         shadowSizeAnchor: icon.shadowSizeAnchor ? L.point(icon.shadowSizeAnchor.value.width, icon.shadowSizeAnchor.value.height) : null,
         className: icon.className
-    })
+    };
+    return result;
 }
+
 
 function shapeToLatLngArray(shape) {
     var latlngs = [];
@@ -392,8 +413,6 @@ function addLayer(mapId, layer, layerId) {
     layer.addTo(maps[mapId]);
 }
 
-// #region events
-
 // removes properties that can cause circular references
 function cleanupEventArgsForSerialization(eventArgs) {
 
@@ -497,4 +516,3 @@ function connectInteractionEvents(interactiveObject, objectReference) {
     });
 }
 
-// #endregion
