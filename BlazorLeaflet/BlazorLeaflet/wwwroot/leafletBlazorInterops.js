@@ -1,10 +1,5 @@
 ﻿maps = {};
 layers = {};
-// when passing objects Blazor kills polymorphism
-// and on the other hand I cannot pass back and forth object:
-// https://stackoverflow.com/questions/72351350/how-to-get-js-object-and-pass-it-back
-// so, Forth-way...
-interop_stack = [];
 
 window.leafletBlazor = {
     create: function (map, objectReference) {
@@ -57,21 +52,18 @@ window.leafletBlazor = {
         const layer = L.shapefile(shapefileLayer.urlTemplate);
         addLayer(mapId, layer, shapefileLayer.id);
     },
-    pushNull: function () {
-        interop_stack.push(null);
+    createIcon: function (icon) {
+        return L.icon(buildIconOptions(icon));
     },
-    pushIcon: function (icon) {
-        interop_stack.push(L.icon(buildIconOptions(icon)));
-    },
-    pushDivIcon: function (icon) {
+    createDivIcon: function (icon) {
         let result = L.divIcon({
             ...buildIconOptions(icon),
             bgPos: icon.bgPos ? L.point(icon.bgPos.x, icon.bgPos.y) : null,
             html:icon.html,
         });
-        interop_stack.push(result);
+        return result;
     },
-    addMarker: function (mapId, marker, objectReference) {
+    addMarker: function (mapId, marker, objectReference, divIcon) {
         var options = {
             ...createInteractiveLayer(marker),
             keyboard: marker.isKeyboardAccessible,
@@ -89,8 +81,12 @@ window.leafletBlazor = {
             autoPanSpeed: marker.autoPanSpeed,
         };
 
-        // make this more visible in code
-        options.icon = interop_stack.pop();
+        // awkward but I have hard time to pass objects to JS in polymorphic fashion and secondly
+        // then figuring out the actual type
+        if (divIcon !== undefined)
+            options.icon = this.createDivIcon(divIcon);
+        else if (marker.icon !== undefined)
+            options.icon = this.createIcon(marker.icon);
 
         const mkr = L.marker(marker.position, options);
         connectMarkerEvents(mkr, objectReference);

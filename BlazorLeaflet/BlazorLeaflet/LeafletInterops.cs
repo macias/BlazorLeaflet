@@ -34,24 +34,6 @@ namespace BlazorLeaflet
                 value.Item1.Dispose();
         }
 
-        private static async ValueTask AddMarker(IJSRuntime jsRuntime, string mapId, Marker marker)
-        {
-            switch (marker.Icon)
-            {
-                case DivIcon div_icon: 
-                    await jsRuntime.InvokeAsync<object>($"{_BaseObjectContainer}.pushDivIcon", div_icon);
-                    break;
-                case Icon icon: 
-                    await jsRuntime.InvokeAsync<object>($"{_BaseObjectContainer}.pushIcon", icon);
-                    break;
-                default: 
-                    await jsRuntime.InvokeAsync<object>($"{_BaseObjectContainer}.pushNull");
-                    break;
-            }
-
-            await jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addMarker", mapId, marker, CreateLayerReference(mapId, marker));
-        }
-
         public static ValueTask AddLayer(IJSRuntime jsRuntime, string mapId, Layer layer)
         {
             return layer switch
@@ -60,7 +42,7 @@ namespace BlazorLeaflet
                 TileLayer tileLayer => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addTilelayer", mapId, tileLayer, CreateLayerReference(mapId, tileLayer)),
                 MbTilesLayer mbTilesLayer => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addMbTilesLayer", mapId, mbTilesLayer, CreateLayerReference(mapId, mbTilesLayer)),
                 ShapefileLayer shapefileLayer => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addShapefileLayer", mapId, shapefileLayer, CreateLayerReference(mapId, shapefileLayer)),
-                Marker marker => AddMarker(jsRuntime,mapId,marker),
+                Marker marker => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addMarker", mapId, marker, CreateLayerReference(mapId, marker), marker.Icon as DivIcon),
                 Rectangle rectangle => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addRectangle", mapId, rectangle, CreateLayerReference(mapId, rectangle)),
                 Circle circle => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addCircle", mapId, circle, CreateLayerReference(mapId, circle)),
                 Polygon polygon => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addPolygon", mapId, polygon, CreateLayerReference(mapId, polygon)),
