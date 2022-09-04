@@ -74,6 +74,11 @@ namespace BlazorLeaflet
         public static ValueTask UpdateTooltipContent(IJSRuntime jsRuntime, string mapId, Layer layer) =>
             jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.updateTooltipContent", mapId, layer.Id, layer.Tooltip?.Content);
 
+        public static ValueTask SetLatLngAsync(IJSRuntime jsRuntime,string mapId, Marker marker, LatLng position)
+        {
+                return jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.setLatLng", mapId, marker, position);
+        }
+
         public static ValueTask UpdateShape(IJSRuntime jsRuntime, string mapId, Layer layer) =>
             layer switch
             {

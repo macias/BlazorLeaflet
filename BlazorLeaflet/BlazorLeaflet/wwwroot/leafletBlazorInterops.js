@@ -140,6 +140,12 @@ window.leafletBlazor = {
             layer.setBounds([[rectangle.shape.bottom, rectangle.shape.left], [rectangle.shape.top, rectangle.shape.right]]);
         }
     },
+    setLatLng: function (mapId, marker,position) {
+        let js_marker = layers[mapId].find(l => l.id === marker.id);
+        if (js_marker !== undefined) {
+            js_marker.setLatLng(position);
+        }
+        },
     addCircle: function (mapId, circle, objectReference) {
         const layer = L.circle(circle.position,
             {

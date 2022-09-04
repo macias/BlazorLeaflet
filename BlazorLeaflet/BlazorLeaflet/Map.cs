@@ -63,13 +63,13 @@ namespace BlazorLeaflet
 
         private ObservableCollection<Layer> _layers = new ObservableCollection<Layer>();
 
-        private readonly IJSRuntime _jsRuntime;
+        internal IJSRuntime JsRuntime { get; }
 
         private bool _isInitialized;
 
         public Map(IJSRuntime jsRuntime)
         {
-            _jsRuntime = jsRuntime ?? throw new ArgumentNullException(nameof(jsRuntime));
+            JsRuntime = jsRuntime ?? throw new ArgumentNullException(nameof(jsRuntime));
             Id = StringHelper.GetRandomString(10);
 
             _layers.CollectionChanged += OnLayersChanged;
@@ -142,7 +142,7 @@ namespace BlazorLeaflet
                 foreach (var item in args.NewItems)
                 {
                     var layer = item as Layer;
-                    LeafletInterops.AddLayer(_jsRuntime, Id, layer);
+                    LeafletInterops.AddLayer(JsRuntime, Id, layer);
                 }
             }
             else if (args.Action == NotifyCollectionChangedAction.Remove)
@@ -151,7 +151,7 @@ namespace BlazorLeaflet
                 {
                     if (item is Layer layer)
                     {
-                        LeafletInterops.RemoveLayer(_jsRuntime, Id, layer.Id);
+                        LeafletInterops.RemoveLayer(JsRuntime, Id, layer.Id);
                     }
                 }
             }
@@ -160,40 +160,40 @@ namespace BlazorLeaflet
             {
                 foreach (var oldItem in args.OldItems)
                     if (oldItem is Layer layer)
-                        LeafletInterops.RemoveLayer(_jsRuntime, Id, layer.Id);
+                        LeafletInterops.RemoveLayer(JsRuntime, Id, layer.Id);
 
                 foreach (var newItem in args.NewItems)
-                    LeafletInterops.AddLayer(_jsRuntime, Id, newItem as Layer);
+                    LeafletInterops.AddLayer(JsRuntime, Id, newItem as Layer);
             }
         }
 
         public void FitBounds(PointF corner1, PointF corner2, PointF? padding = null, float? maxZoom = null)
         {
-            LeafletInterops.FitBounds(_jsRuntime, Id, corner1, corner2, padding, maxZoom);
+            LeafletInterops.FitBounds(JsRuntime, Id, corner1, corner2, padding, maxZoom);
         }
 
         public void PanTo(PointF position, bool animate = false, float duration = 0.25f, float easeLinearity = 0.25f, bool noMoveStart = false)
         {
-            LeafletInterops.PanTo(_jsRuntime, Id, position, animate, duration, easeLinearity, noMoveStart);
+            LeafletInterops.PanTo(JsRuntime, Id, position, animate, duration, easeLinearity, noMoveStart);
         }
 
-        public async Task<LatLng> GetCenter() => await LeafletInterops.GetCenter(_jsRuntime, Id);
+        public async Task<LatLng> GetCenter() => await LeafletInterops.GetCenter(JsRuntime, Id);
         public async Task<float> GetZoom() => 
-            await LeafletInterops.GetZoom(_jsRuntime, Id);
+            await LeafletInterops.GetZoom(JsRuntime, Id);
 
         /// <summary>
         /// Increases the zoom level by one notch.
         /// 
         /// If <c>shift</c> is held down, increases it by three.
         /// </summary>
-        public async Task ZoomIn(MouseEventArgs e) => await LeafletInterops.ZoomIn(_jsRuntime, Id, e);
+        public async Task ZoomIn(MouseEventArgs e) => await LeafletInterops.ZoomIn(JsRuntime, Id, e);
 
         /// <summary>
         /// Decreases the zoom level by one notch.
         /// 
         /// If <c>shift</c> is held down, decreases it by three.
         /// </summary>
-        public async Task ZoomOut(MouseEventArgs e) => await LeafletInterops.ZoomOut(_jsRuntime, Id, e);
+        public async Task ZoomOut(MouseEventArgs e) => await LeafletInterops.ZoomOut(JsRuntime, Id, e);
 
         #region events
 
@@ -306,11 +306,11 @@ namespace BlazorLeaflet
 
         public ValueTask OpenPopupAsync(Popup popup)
         {
-            return LeafletInterops.OpenPopupOnMapAsync(this._jsRuntime, this.Id,popup);
+            return LeafletInterops.OpenPopupOnMapAsync(this.JsRuntime, this.Id,popup);
         }
         public ValueTask ClosePopupAsync(Popup popup)
         {
-            return LeafletInterops.ClosePopupOnMapAsync(this._jsRuntime, this.Id,popup);
+            return LeafletInterops.ClosePopupOnMapAsync(this.JsRuntime, this.Id,popup);
         }
     }
 }

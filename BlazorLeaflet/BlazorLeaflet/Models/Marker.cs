@@ -3,13 +3,14 @@ using BlazorLeaflet.Utils;
 using Microsoft.JSInterop;
 using System;
 using System.Drawing;
+using System.Threading.Tasks;
 
 namespace BlazorLeaflet.Models
 {
     public class Marker : InteractiveLayer
     {
         /// <summary>
-        /// The position of the marker on the map.
+        /// The position of the marker on the map. Setting position does not update marker position visually.
         /// </summary>
         public LatLng Position { get; set; }
 
@@ -86,8 +87,6 @@ namespace BlazorLeaflet.Models
             Position = latLng;
         }
 
-        #region events
-
         public delegate void DragEventHandler(Marker sender, DragEvent e);
 
         public event DragEventHandler OnMove;
@@ -142,7 +141,10 @@ namespace BlazorLeaflet.Models
             OnMoveEnd?.Invoke(this, eventArgs);
         }
 
-        #endregion
-
+        public async ValueTask SetLatLngAsync(Map map, LatLng coords)
+        {
+            await LeafletInterops.SetLatLngAsync(map.JsRuntime, map.Id, this, coords);
+            Position = coords;
+        }
     }
 }
