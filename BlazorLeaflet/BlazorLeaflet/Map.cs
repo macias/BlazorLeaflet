@@ -64,6 +64,7 @@ namespace BlazorLeaflet
         private ObservableCollection<Layer> _layers = new ObservableCollection<Layer>();
 
         internal IJSRuntime JsRuntime { get; }
+        public IJSObjectReference JsRef { get; set; }
 
         private bool _isInitialized;
 

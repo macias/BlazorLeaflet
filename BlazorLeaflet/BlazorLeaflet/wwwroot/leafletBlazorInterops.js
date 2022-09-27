@@ -15,6 +15,7 @@ window.leafletBlazor = {
         connectMapEvents(leafletMap, objectReference);
         maps[map.id] = leafletMap;
         layers[map.id] = [];
+        return leafletMap;
     },
     addTilelayer: function (mapId, tileLayer, objectReference) {
         const layer = L.tileLayer(tileLayer.urlTemplate, {
@@ -92,6 +93,40 @@ window.leafletBlazor = {
         connectMarkerEvents(mkr, objectReference);
         addLayer(mapId, mkr, marker.id);
         setTooltipAndPopupIfDefined(marker, mkr);
+        return mkr;
+    },
+    addMarker2: function (mapId,markerId, jsMarker) {
+        addLayer(mapId, jsMarker, markerId);
+    },
+    createMarker: function ( marker, objectReference, divIcon) {
+        var options = {
+            ...createInteractiveLayer(marker),
+            keyboard: marker.isKeyboardAccessible,
+            title: marker.title,
+            alt: marker.alt,
+            zIndexOffset: marker.zIndexOffset,
+            opacity: marker.opacity,
+            riseOnHover: marker.riseOnHover,
+            riseOffset: marker.riseOffset,
+            pane: marker.pane,
+            bubblingMouseEvents: marker.isBubblingMouseEvents,
+            draggable: marker.draggable,
+            autoPan: marker.useAutopan,
+            autoPanPadding: marker.autoPanPadding,
+            autoPanSpeed: marker.autoPanSpeed,
+        };
+
+        // awkward but I have hard time to pass objects to JS in polymorphic fashion and secondly
+        // then figuring out the actual type
+        if (divIcon !== undefined)
+            options.icon = this.createDivIcon(divIcon);
+        else if (marker.icon !== undefined)
+            options.icon = this.createIcon(marker.icon);
+
+        const mkr = L.marker(marker.position, options);
+        connectMarkerEvents(mkr, objectReference);
+        setTooltipAndPopupIfDefined(marker, mkr);
+        return mkr;
     },
     addPopupLayer: function (mapId, popup, objectReference) {
         var js_popup = buildPopup(popup,objectReference);

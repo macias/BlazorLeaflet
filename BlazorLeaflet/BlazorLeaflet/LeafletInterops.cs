@@ -3,14 +3,13 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
 using Rectangle = BlazorLeaflet.Models.Rectangle;
 
 namespace BlazorLeaflet
 {
-    public static class LeafletInterops
+    internal static class LeafletInterops
     {
 
         private static ConcurrentDictionary<string, (IDisposable, string, Layer)> LayerReferences { get; }
@@ -18,8 +17,11 @@ namespace BlazorLeaflet
 
         private static readonly string _BaseObjectContainer = "window.leafletBlazor";
 
-        public static ValueTask Create(IJSRuntime jsRuntime, Map map) =>
-            jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.create", map, DotNetObjectReference.Create(map));
+        public static async ValueTask Create(IJSRuntime jsRuntime, Map map)
+        {
+           var js_ref = await jsRuntime.InvokeAsync<IJSObjectReference>($"{_BaseObjectContainer}.create", map, DotNetObjectReference.Create(map));
+           map.JsRef = js_ref;
+        }
 
         private static DotNetObjectReference<T> CreateLayerReference<T>(string mapId, T layer) where T : Layer
         {
@@ -42,7 +44,7 @@ namespace BlazorLeaflet
                 TileLayer tileLayer => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addTilelayer", mapId, tileLayer, CreateLayerReference(mapId, tileLayer)),
                 MbTilesLayer mbTilesLayer => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addMbTilesLayer", mapId, mbTilesLayer, CreateLayerReference(mapId, mbTilesLayer)),
                 ShapefileLayer shapefileLayer => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addShapefileLayer", mapId, shapefileLayer, CreateLayerReference(mapId, shapefileLayer)),
-                Marker marker => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addMarker", mapId, marker, CreateLayerReference(mapId, marker), marker.Icon as DivIcon),
+                Marker marker => addMarkerAsync(jsRuntime, mapId, marker),
                 Rectangle rectangle => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addRectangle", mapId, rectangle, CreateLayerReference(mapId, rectangle)),
                 Circle circle => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addCircle", mapId, circle, CreateLayerReference(mapId, circle)),
                 Polygon polygon => jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.addPolygon", mapId, polygon, CreateLayerReference(mapId, polygon)),
@@ -53,6 +55,22 @@ namespace BlazorLeaflet
             };
         }
 
+        private static async ValueTask addMarkerAsync(IJSRuntime jsRuntime, string mapId, Marker marker)
+        {
+            if (marker.JsRef == null)
+                await RegisterAsync(jsRuntime, marker).ConfigureAwait(false);
+            var js_ref = await jsRuntime.InvokeAsync<IJSObjectReference>($"{_BaseObjectContainer}.addMarker2",
+                //mapId, marker,CreateLayerReference(mapId, marker),marker.Icon as DivIcon
+                mapId,marker.Id,marker.JsRef
+                ).ConfigureAwait(false);
+            //marker.JsRef = js_ref;
+        }
+        internal static async ValueTask RegisterAsync(IJSRuntime jsRuntime, Marker marker)
+        {
+            var js_ref = await jsRuntime.InvokeAsync<IJSObjectReference>($"{_BaseObjectContainer}.createMarker", 
+                marker, marker.DotNetRef, marker.Icon as DivIcon).ConfigureAwait(false);
+            marker.JsRef = js_ref;
+        }
         public static ValueTask OpenPopupOnMapAsync(IJSRuntime jsRuntime, string mapId, Popup popup)
         {
             return jsRuntime.InvokeVoidAsync($"{_BaseObjectContainer}.openPopupOnMap", mapId, popup, CreateLayerReference(mapId, popup));

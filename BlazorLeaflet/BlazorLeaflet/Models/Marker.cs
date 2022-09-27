@@ -1,14 +1,14 @@
-﻿using BlazorLeaflet.Models.Events;
-using BlazorLeaflet.Utils;
+﻿using System;
+using BlazorLeaflet.Models.Events;
 using Microsoft.JSInterop;
-using System;
 using System.Drawing;
 using System.Threading.Tasks;
 
 namespace BlazorLeaflet.Models
 {
-    public class Marker : InteractiveLayer
+    public class Marker : InteractiveLayer,IAsyncDisposable
     {
+
         /// <summary>
         /// The position of the marker on the map. Setting position does not update marker position visually.
         /// </summary>
@@ -77,15 +77,10 @@ namespace BlazorLeaflet.Models
         /// Number of pixels the map should pan by.
         /// </summary>
         public int AutoPanSpeed { get; set; } = 10;
-        
-        public Marker(float x, float y) : this(new LatLng(x, y)) { }
 
-        public Marker(PointF position) : this(position.X, position.Y) { }
+        public IJSObjectReference JsRef { get; set; }
+        public DotNetObjectReference<Marker> DotNetRef { get; }
 
-        public Marker(LatLng latLng)
-        {
-            Position = latLng;
-        }
 
         public delegate void DragEventHandler(Marker sender, DragEvent e);
 
@@ -140,11 +135,33 @@ namespace BlazorLeaflet.Models
         {
             OnMoveEnd?.Invoke(this, eventArgs);
         }
+        
+        public Marker(LatLng latLng)
+        {
+            Position = latLng;
+            DotNetRef = DotNetObjectReference.Create(this);
+        }
+
+        public Marker(float x, float y) : this(new LatLng(x, y)) { }
+
+        public Marker(PointF position) : this(position.X, position.Y) { }
 
         public async ValueTask SetLatLngAsync(Map map, LatLng coords)
         {
             await LeafletInterops.SetLatLngAsync(map.JsRuntime, map.Id, this, coords);
             Position = coords;
+        }
+
+        public async ValueTask<Marker> RegisterAsync(IJSRuntime jsRuntime)
+        {
+            await LeafletInterops.RegisterAsync(jsRuntime, this).ConfigureAwait(false);
+            return this;
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            DotNetRef.Dispose();
+            return JsRef.DisposeAsync();
         }
     }
 }
