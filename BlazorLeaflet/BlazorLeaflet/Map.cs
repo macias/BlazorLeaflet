@@ -79,7 +79,7 @@ namespace BlazorLeaflet
         /// <summary>
         /// This method MUST be called only once by the Blazor component upon rendering, and never by the user.
         /// </summary>
-        public void RaiseOnInitialized()
+        internal void RaiseOnInitialized()
         {
             _isInitialized = true;
             OnInitialized?.Invoke();
