@@ -62,13 +62,13 @@ namespace BlazorLeaflet
             var js_ref = await jsRuntime.InvokeAsync<IJSObjectReference>($"{_BaseObjectContainer}.addMarker2",
                 //mapId, marker,CreateLayerReference(mapId, marker),marker.Icon as DivIcon
                 mapId,marker.Id,marker.JsRef
-                ).ConfigureAwait(false);
+                );
             //marker.JsRef = js_ref;
         }
         internal static async ValueTask RegisterAsync(IJSRuntime jsRuntime, Marker marker)
         {
             var js_ref = await jsRuntime.InvokeAsync<IJSObjectReference>($"{_BaseObjectContainer}.createMarker", 
-                marker, marker.DotNetRef, marker.Icon as DivIcon).ConfigureAwait(false);
+                marker, marker.DotNetRef, marker.Icon as DivIcon);
             marker.JsRef = js_ref;
         }
         public static ValueTask OpenPopupOnMapAsync(IJSRuntime jsRuntime, string mapId, Popup popup)
