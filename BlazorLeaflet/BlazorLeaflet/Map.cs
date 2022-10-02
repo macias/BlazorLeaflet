@@ -7,14 +7,13 @@ using Microsoft.JSInterop;
 using BlazorLeaflet.Models.Events;
 using System.Threading.Tasks;
 using System.Collections.Specialized;
-using BlazorLeaflet.Exceptions;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Components.Web;
 
 namespace BlazorLeaflet
 {
-    public class Map
+    public sealed class Map 
     {
         /// <summary>
         /// Initial geographic center of the map
@@ -63,10 +62,11 @@ namespace BlazorLeaflet
 
         private ObservableCollection<Layer> _layers = new ObservableCollection<Layer>();
 
-        internal IJSRuntime JsRuntime { get; }
+        public IJSRuntime JsRuntime { get; }
         public IJSObjectReference JsRef { get; set; }
 
         private bool _isInitialized;
+        private readonly List<ILayer> newLayers;
 
         public Map(IJSRuntime jsRuntime)
         {
@@ -74,6 +74,8 @@ namespace BlazorLeaflet
             Id = StringHelper.GetRandomString(10);
 
             _layers.CollectionChanged += OnLayersChanged;
+
+            this.newLayers = new List<ILayer>();
         }
 
         /// <summary>
@@ -100,7 +102,7 @@ namespace BlazorLeaflet
 
             if (!_isInitialized)
             {
-                throw new UninitializedMapException();
+                throw new InvalidOperationException();
             }
 
             _layers.Add(layer);
@@ -121,7 +123,7 @@ namespace BlazorLeaflet
 
             if (!_isInitialized)
             {
-                throw new UninitializedMapException();
+                throw new InvalidOperationException();
             }
 
             _layers.Remove(layer);
@@ -138,6 +140,7 @@ namespace BlazorLeaflet
 
         private void OnLayersChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
+            Console.WriteLine("OnLayersChanged start");
             if (args.Action == NotifyCollectionChangedAction.Add)
             {
                 foreach (var item in args.NewItems)
@@ -166,6 +169,7 @@ namespace BlazorLeaflet
                 foreach (var newItem in args.NewItems)
                     LeafletInterops.AddLayer(JsRuntime, Id, newItem as Layer);
             }
+            Console.WriteLine("OnLayersChanged end");
         }
 
         public void FitBounds(PointF corner1, PointF corner2, PointF? padding = null, float? maxZoom = null)
@@ -196,8 +200,6 @@ namespace BlazorLeaflet
         /// </summary>
         public async Task ZoomOut(MouseEventArgs e) => await LeafletInterops.ZoomOut(JsRuntime, Id, e);
 
-        #region events
-
         public delegate void MapEventHandler(object sender, Event e);
         public delegate void MapResizeEventHandler(object sender, ResizeEvent e);
 
@@ -210,6 +212,7 @@ namespace BlazorLeaflet
         public void NotifyResize(ResizeEvent e) => OnResize?.Invoke(this, e);
 
         public event MapEventHandler OnUnload;
+        
         [JSInvokable]
         public void NotifyUnload(Event e) => OnUnload?.Invoke(this, e);
 
@@ -218,10 +221,12 @@ namespace BlazorLeaflet
         public void NotifyViewReset(Event e) => OnViewReset?.Invoke(this, e);
 
         public event MapEventHandler OnLoad;
+        
         [JSInvokable]
         public void NotifyLoad(Event e) => OnLoad?.Invoke(this, e);
 
         public event MapEventHandler OnZoomStart;
+        
         [JSInvokable]
         public void NotifyZoomStart(Event e) => OnZoomStart?.Invoke(this, e);
 
@@ -230,14 +235,17 @@ namespace BlazorLeaflet
         public void NotifyMoveStart(Event e) => OnMoveStart?.Invoke(this, e);
 
         public event MapEventHandler OnZoom;
+        
         [JSInvokable]
         public void NotifyZoom(Event e) => OnZoom?.Invoke(this, e);
 
         public event MapEventHandler OnMove;
+        
         [JSInvokable]
         public void NotifyMove(Event e) => OnMove?.Invoke(this, e);
 
         public event MapEventHandler OnZoomEnd;
+        
         [JSInvokable]
         public void NotifyZoomEnd(Event e) => OnZoomEnd?.Invoke(this, e);
 
@@ -265,9 +273,6 @@ namespace BlazorLeaflet
         [JSInvokable]
         public void NotifyPreClick(MouseEvent eventArgs) => OnPreClick?.Invoke(this, eventArgs);
 
-        #endregion events
-
-        #region InteractiveLayerEvents
         // Has the same events as InteractiveLayer, but it is not a layer. 
         // Could place this code in its own class and make Layer inherit from that, but not every layer is interactive...
         // Is there a way to not duplicate this code?
@@ -295,6 +300,7 @@ namespace BlazorLeaflet
         public void NotifyMouseOver(MouseEvent eventArgs) => OnMouseOver?.Invoke(this, eventArgs);
 
         public event MouseEventHandler OnMouseOut;
+        
         [JSInvokable]
         public void NotifyMouseOut(MouseEvent eventArgs) => OnMouseOut?.Invoke(this, eventArgs);
 
@@ -302,8 +308,6 @@ namespace BlazorLeaflet
 
         [JSInvokable]
         public void NotifyContextMenu(MouseEvent eventArgs) => OnContextMenu?.Invoke(this, eventArgs);
-
-        #endregion InteractiveLayerEvents
 
         public ValueTask OpenPopupAsync(Popup popup)
         {
@@ -313,5 +317,13 @@ namespace BlazorLeaflet
         {
             return LeafletInterops.ClosePopupOnMapAsync(this.JsRuntime, this.Id,popup);
         }
+        
+        public ValueTask AddNewLayerAsync(ILayer layer)
+        {
+            this.newLayers.Add(layer);
+            return JsRuntime.InvokeVoidAsync($"{LeafletInterops.BaseObjectContainer}.addNewLayer",
+                JsRef,layer.JsRef);
+        }
+
     }
 }

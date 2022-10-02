@@ -98,6 +98,9 @@ window.leafletBlazor = {
     addMarker2: function (mapId,markerId, jsMarker) {
         addLayer(mapId, jsMarker, markerId);
     },
+    addNewLayer: function (map,layer) {
+        map.addLayer(layer);
+    },
     createMarker: function ( marker, objectReference, divIcon) {
         var options = {
             ...createInteractiveLayer(marker),
@@ -123,10 +126,10 @@ window.leafletBlazor = {
         else if (marker.icon !== undefined)
             options.icon = this.createIcon(marker.icon);
 
-        const mkr = L.marker(marker.position, options);
-        connectMarkerEvents(mkr, objectReference);
-        setTooltipAndPopupIfDefined(marker, mkr);
-        return mkr;
+        const js_marker = L.marker(marker.position, options);
+        connectMarkerEvents(js_marker, objectReference);
+        setTooltipAndPopupIfDefined(marker, js_marker);
+        return js_marker;
     },
     addPopupLayer: function (mapId, popup, objectReference) {
         var js_popup = buildPopup(popup,objectReference);
