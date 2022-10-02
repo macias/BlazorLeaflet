@@ -158,10 +158,19 @@ namespace BlazorLeaflet.Models
             return this;
         }
 
-        public ValueTask DisposeAsync()
+        public override async ValueTask DisposeAsync()
         {
             DotNetRef.Dispose();
-            return JsRef.DisposeAsync();
+            await JsRef.DisposeAsync();
+
+            OnMove = null;
+            OnDragStart = null;
+            OnMoveStart = null;
+            OnDrag = null;
+            OnDragEnd = null;
+            OnMoveEnd = null;
+
+            await base.DisposeAsync();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using BlazorLeaflet.Models.Events;
+﻿using System.Threading.Tasks;
+using BlazorLeaflet.Models.Events;
 using Microsoft.JSInterop;
 
 namespace BlazorLeaflet.Models
@@ -16,8 +17,7 @@ namespace BlazorLeaflet.Models
         /// </summary>
         public virtual bool IsBubblingMouseEvents { get; set; } = true;
 
-        #region events
-
+    
         public delegate void MouseEventHandler(InteractiveLayer sender, MouseEvent e);
 
         public event MouseEventHandler OnClick;
@@ -76,7 +76,18 @@ namespace BlazorLeaflet.Models
             OnContextMenu?.Invoke(this, eventArgs);
         }
 
-        #endregion
+        public override ValueTask DisposeAsync()
+        {
+         OnClick= null;
+         OnDblClick= null; 
+         OnMouseDown= null;
+         OnMouseUp= null; 
+         OnMouseOver= null;
+         OnMouseOut= null;
+         OnContextMenu= null;
+
+            return base.DisposeAsync();
+        }
 
     }
 }

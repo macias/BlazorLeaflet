@@ -1,10 +1,12 @@
-﻿using BlazorLeaflet.Models.Events;
+﻿using System;
+using System.Threading.Tasks;
+using BlazorLeaflet.Models.Events;
 using BlazorLeaflet.Utils;
 using Microsoft.JSInterop;
 
 namespace BlazorLeaflet.Models
 {
-    public abstract class Layer
+    public abstract class Layer : IAsyncDisposable
     {
         /// <summary>
         /// Unique identifier used by the interoperability service on the client side to identify layers.
@@ -31,16 +33,10 @@ namespace BlazorLeaflet.Models
         /// </summary>
         public Popup Popup { get; set; }
 
-        protected Layer()
-        {
-            Id = StringHelper.GetRandomString(20);
-        }
-
-        #region events
 
         public delegate void EventHandler(Layer sender, Event e);
 
-        public event EventHandler OnAdd;
+        EventHandler OnAdd;
 
         [JSInvokable]
         public void NotifyAdd(Event eventArgs)
@@ -48,7 +44,7 @@ namespace BlazorLeaflet.Models
             OnAdd?.Invoke(this, eventArgs);
         }
 
-        public event EventHandler OnRemove;
+        EventHandler OnRemove;
 
         [JSInvokable]
         public void NotifyRemove(Event eventArgs)
@@ -58,7 +54,7 @@ namespace BlazorLeaflet.Models
 
         public delegate void PopupEventHandler(Layer sender, PopupEvent e);
 
-        public event PopupEventHandler OnPopupOpen;
+        PopupEventHandler OnPopupOpen;
 
         [JSInvokable]
         public void NotifyPopupOpen(PopupEvent eventArgs)
@@ -66,7 +62,7 @@ namespace BlazorLeaflet.Models
             OnPopupOpen?.Invoke(this, eventArgs);
         }
 
-        public event PopupEventHandler OnPopupClose;
+        PopupEventHandler OnPopupClose;
 
         [JSInvokable]
         public void NotifyPopupClose(PopupEvent eventArgs)
@@ -76,7 +72,7 @@ namespace BlazorLeaflet.Models
 
         public delegate void TooltipEventHandler(Layer sender, TooltipEvent e);
 
-        public event TooltipEventHandler OnTooltipOpen;
+        TooltipEventHandler OnTooltipOpen;
 
         [JSInvokable]
         public void NotifyTooltipOpen(TooltipEvent eventArgs)
@@ -84,7 +80,7 @@ namespace BlazorLeaflet.Models
             OnTooltipOpen?.Invoke(this, eventArgs);
         }
 
-        public event TooltipEventHandler OnTooltipClose;
+        TooltipEventHandler OnTooltipClose;
 
         [JSInvokable]
         public void NotifyTooltipClose(TooltipEvent eventArgs)
@@ -92,6 +88,22 @@ namespace BlazorLeaflet.Models
             OnTooltipClose?.Invoke(this, eventArgs);
         }
 
-        #endregion
+        protected Layer()
+        {
+            Id = StringHelper.GetRandomString(20);
+        }
+
+        public virtual ValueTask DisposeAsync()
+        {
+            OnAdd = null;
+            OnRemove = null;
+            OnPopupOpen = null;
+            OnPopupClose = null;
+            OnTooltipOpen = null;
+            OnTooltipClose = null;
+            
+            return ValueTask.CompletedTask;
+        }
     }
 }
+
