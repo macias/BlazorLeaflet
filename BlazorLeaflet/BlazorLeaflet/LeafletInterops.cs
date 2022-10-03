@@ -59,7 +59,7 @@ namespace BlazorLeaflet
         {
             if (marker.JsRef == null)
                 await RegisterAsync(jsRuntime, marker);
-            await jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.addMarker2",
+            await jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.addNewMarker",
                 //mapId, marker,CreateLayerReference(mapId, marker),marker.Icon as DivIcon
                 mapId,marker.Id,marker.JsRef
                 );
@@ -67,7 +67,6 @@ namespace BlazorLeaflet
         }
         internal static async ValueTask RegisterAsync(IJSRuntime jsRuntime, Marker marker)
         {
-            Console.WriteLine("C# code, adding marker");
             var js_ref = await jsRuntime.InvokeAsync<IJSObjectReference>($"{BaseObjectContainer}.createMarker", 
                 marker, marker.DotNetRef, marker.Icon as DivIcon);
             marker.JsRef = js_ref;

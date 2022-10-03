@@ -140,7 +140,6 @@ namespace BlazorLeaflet
 
         private void OnLayersChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
-            Console.WriteLine("OnLayersChanged start");
             if (args.Action == NotifyCollectionChangedAction.Add)
             {
                 foreach (var item in args.NewItems)
@@ -169,7 +168,6 @@ namespace BlazorLeaflet
                 foreach (var newItem in args.NewItems)
                     LeafletInterops.AddLayer(JsRuntime, Id, newItem as Layer);
             }
-            Console.WriteLine("OnLayersChanged end");
         }
 
         public void FitBounds(PointF corner1, PointF corner2, PointF? padding = null, float? maxZoom = null)
@@ -325,5 +323,12 @@ namespace BlazorLeaflet
                 JsRef,layer.JsRef);
         }
 
+        public async ValueTask<bool> RemoveNewLayerAsync(ILayer layer)
+        {
+            await JsRuntime.InvokeVoidAsync($"{LeafletInterops.BaseObjectContainer}.removeNewLayer",
+                JsRef,layer.JsRef);
+            return this.newLayers.Remove(layer);
+        }
+        
     }
 }

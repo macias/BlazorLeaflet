@@ -95,11 +95,14 @@ window.leafletBlazor = {
         setTooltipAndPopupIfDefined(marker, mkr);
         return mkr;
     },
-    addMarker2: function (mapId,markerId, jsMarker) {
+    addNewMarker: function (mapId,markerId, jsMarker) {
         addLayer(mapId, jsMarker, markerId);
     },
     addNewLayer: function (map,layer) {
         map.addLayer(layer);
+    },
+    removeNewLayer: function (map,layer) {
+        map.removeLayer(layer);
     },
     createMarker: function ( marker, objectReference, divIcon) {
         var options = {

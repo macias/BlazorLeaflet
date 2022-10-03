@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BlazorLeaflet.Models
 {
-    public class Marker : InteractiveLayer,IAsyncDisposable
+    public class Marker : InteractiveLayer,IAsyncDisposable,ILayer
     {
 
         /// <summary>
