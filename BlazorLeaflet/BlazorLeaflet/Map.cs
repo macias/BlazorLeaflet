@@ -316,10 +316,10 @@ namespace BlazorLeaflet
             return LeafletInterops.ClosePopupOnMapAsync(this.JsRuntime, this.Id,popup);
         }
         
-        public ValueTask AddNewLayerAsync(ILayer layer)
+        public async ValueTask AddNewLayerAsync(ILayer layer)
         {
             this.newLayers.Add(layer);
-            return JsRuntime.InvokeVoidAsync($"{LeafletInterops.BaseObjectContainer}.addNewLayer",
+            await JsRuntime.InvokeVoidAsync($"{LeafletInterops.BaseObjectContainer}.addNewLayer",
                 JsRef,layer.JsRef);
         }
 
@@ -327,7 +327,8 @@ namespace BlazorLeaflet
         {
             await JsRuntime.InvokeVoidAsync($"{LeafletInterops.BaseObjectContainer}.removeNewLayer",
                 JsRef,layer.JsRef);
-            return this.newLayers.Remove(layer);
+            var result = this.newLayers.Remove(layer);
+            return result;
         }
         
     }
