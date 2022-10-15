@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
+﻿using System.Drawing;
 
 namespace BlazorLeaflet.Models.Events
 {
@@ -13,5 +10,6 @@ namespace BlazorLeaflet.Models.Events
 
         public PointF ContainerPoint { get; set; }
 
+        public DomMouseEvent OriginalEvent { get; set; }
     }
 }

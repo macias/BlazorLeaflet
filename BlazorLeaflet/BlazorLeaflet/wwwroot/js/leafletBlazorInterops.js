@@ -60,7 +60,7 @@ window.leafletBlazor = {
         let result = L.divIcon({
             ...buildIconOptions(icon),
             bgPos: icon.bgPos ? L.point(icon.bgPos.x, icon.bgPos.y) : null,
-            html:icon.html,
+            html: icon.html,
         });
         return result;
     },
@@ -95,19 +95,19 @@ window.leafletBlazor = {
         setTooltipAndPopupIfDefined(marker, mkr);
         return mkr;
     },
-    addNewMarker: function (mapId,markerId, jsMarker) {
+    addNewMarker: function (mapId, markerId, jsMarker) {
         addLayer(mapId, jsMarker, markerId);
     },
-    addNewLayer: function (map,layer) {
+    addNewLayer: function (map, layer) {
         map.addLayer(layer);
     },
     addNewPolyline: function (mapId, polylineId, jsPolyline) {
         addLayer(mapId, jsPolyline, polylineId);
     },
-    removeNewLayer: function (map,layer) {
+    removeNewLayer: function (map, layer) {
         map.removeLayer(layer);
     },
-    createNewMarker: function ( marker, objectReference, divIcon) {
+    createNewMarker: function (marker, objectReference, divIcon) {
         var options = {
             ...createInteractiveLayer(marker),
             keyboard: marker.isKeyboardAccessible,
@@ -144,11 +144,11 @@ window.leafletBlazor = {
         return js_layer;
     },
     addPopupLayer: function (mapId, popup, objectReference) {
-        var js_popup = buildPopup(popup,objectReference);
+        var js_popup = buildPopup(popup, objectReference);
         addLayer(mapId, js_popup, popup.id);
     },
     openPopupOnMap: function (mapId, popup, objectReference) {
-        var js_popup = buildPopup(popup,objectReference);
+        var js_popup = buildPopup(popup, objectReference);
         js_popup.openOn(maps[mapId]);
         registerLayer(mapId, js_popup, popup.id);
     },
@@ -190,12 +190,12 @@ window.leafletBlazor = {
             layer.setBounds([[rectangle.shape.bottom, rectangle.shape.left], [rectangle.shape.top, rectangle.shape.right]]);
         }
     },
-    setLatLng: function (mapId, marker,position) {
+    setLatLng: function (mapId, marker, position) {
         let js_marker = layers[mapId].find(l => l.id === marker.id);
         if (js_marker !== undefined) {
             js_marker.setLatLng(position);
         }
-        },
+    },
     addCircle: function (mapId, circle, objectReference) {
         const layer = L.circle(circle.position,
             {
@@ -310,13 +310,13 @@ window.leafletBlazor = {
 };
 
 function buildIconOptions(icon) {
-    let result =  {
+    let result = {
         iconUrl: icon.url,
         iconRetinaUrl: icon.retinaUrl,
         iconSize: icon.size ? L.point(icon.size.width, icon.size.height) : null,
         iconAnchor: icon.anchor ? L.point(icon.anchor.x, icon.anchor.y) : null,
         popupAnchor: icon.popupAnchor ? L.point(icon.popupAnchor.x, icon.popupAnchor.y) : L.point(0, 0),
-        tooltipAnchor: icon.tooltipAnchor ? L.point(icon.tooltipAnchor.x, icon.tooltipAnchor.y): L.point(0, 0),
+        tooltipAnchor: icon.tooltipAnchor ? L.point(icon.tooltipAnchor.x, icon.tooltipAnchor.y) : L.point(0, 0),
         shadowUrl: icon.shadowUrl,
         shadowRetinaUrl: icon.shadowRetinaUrl,
         shadowSize: icon.shadowSize ? L.point(icon.shadowSize.value.width, icon.shadowSize.value.height) : null,
@@ -413,6 +413,7 @@ function addTooltip(layerObj, tooltip) {
             opacity: tooltip.opacity
         });
 }
+
 function buildPopupOptions(popup) {
     return {
         pane: popup.pane,
@@ -429,6 +430,7 @@ function buildPopupOptions(popup) {
         closeOnEscapeKey: popup.closeOnEscapeKey,
     };
 }
+
 function addPopup(layerObj, popup) {
     layerObj.bindPopup(popup.content, buildPopupOptions(popup));
 }
@@ -452,7 +454,7 @@ function unregisterLayer(mapId, layerId) {
     if (layer_idx === -1)
         throw 'Cannot unregister, layer not found';
 
-    layers[mapId].splice(layer_idx,1);
+    layers[mapId].splice(layer_idx, 1);
 }
 
 function registerLayer(mapId, layer, layerId) {
@@ -480,7 +482,15 @@ function cleanupEventArgsForSerialization(eventArgs) {
     const copy = {};
 
     for (let key in eventArgs) {
-        if (!propertiesToRemove.includes(key) && eventArgs.hasOwnProperty(key)) {
+        if (key === "originalEvent") {
+            copy.originalEvent = {
+                altKey: eventArgs.originalEvent.altKey,
+                ctrlKey: eventArgs.originalEvent.ctrlKey,
+                metaKey: eventArgs.originalEvent.metaKey,
+                shiftKey: eventArgs.originalEvent.shiftKey,
+            };
+        }
+        else if (!propertiesToRemove.includes(key) && eventArgs.hasOwnProperty(key)) {
             copy[key] = eventArgs[key];
         }
     }
