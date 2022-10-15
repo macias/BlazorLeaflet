@@ -101,10 +101,13 @@ window.leafletBlazor = {
     addNewLayer: function (map,layer) {
         map.addLayer(layer);
     },
+    addNewPolyline: function (mapId, polylineId, jsPolyline) {
+        addLayer(mapId, jsPolyline, polylineId);
+    },
     removeNewLayer: function (map,layer) {
         map.removeLayer(layer);
     },
-    createMarker: function ( marker, objectReference, divIcon) {
+    createNewMarker: function ( marker, objectReference, divIcon) {
         var options = {
             ...createInteractiveLayer(marker),
             keyboard: marker.isKeyboardAccessible,
@@ -133,6 +136,12 @@ window.leafletBlazor = {
         connectMarkerEvents(js_marker, objectReference);
         setTooltipAndPopupIfDefined(marker, js_marker);
         return js_marker;
+    },
+    createNewPolyline: function (polyline, objectReference) {
+        const js_layer = L.polyline(shapeToLatLngArray(polyline.shape), createPolyline(polyline));
+        connectInteractiveLayerEvents(js_layer, objectReference);
+        setTooltipAndPopupIfDefined(polyline, js_layer);
+        return js_layer;
     },
     addPopupLayer: function (mapId, popup, objectReference) {
         var js_popup = buildPopup(popup,objectReference);

@@ -11,7 +11,6 @@ namespace BlazorLeaflet
 {
     internal static class LeafletInterops
     {
-
         private static ConcurrentDictionary<string, (IDisposable, string, Layer)> LayerReferences { get; }
             = new ConcurrentDictionary<string, (IDisposable, string, Layer)>();
 
@@ -19,8 +18,8 @@ namespace BlazorLeaflet
 
         public static async ValueTask Create(IJSRuntime jsRuntime, Map map)
         {
-           var js_ref = await jsRuntime.InvokeAsync<IJSObjectReference>($"{BaseObjectContainer}.create", map, DotNetObjectReference.Create(map));
-           map.JsRef = js_ref;
+            var js_ref = await jsRuntime.InvokeAsync<IJSObjectReference>($"{BaseObjectContainer}.create", map, DotNetObjectReference.Create(map));
+            map.JsRef = js_ref;
         }
 
         private static DotNetObjectReference<T> CreateLayerReference<T>(string mapId, T layer) where T : Layer
@@ -48,7 +47,8 @@ namespace BlazorLeaflet
                 Rectangle rectangle => jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.addRectangle", mapId, rectangle, CreateLayerReference(mapId, rectangle)),
                 Circle circle => jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.addCircle", mapId, circle, CreateLayerReference(mapId, circle)),
                 Polygon polygon => jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.addPolygon", mapId, polygon, CreateLayerReference(mapId, polygon)),
-                Polyline polyline => jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.addPolyline", mapId, polyline, CreateLayerReference(mapId, polyline)),
+                Polyline polyline => addPolylineAsync(jsRuntime, mapId, polyline),
+                // jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.addPolyline", mapId, polyline, CreateLayerReference(mapId, polyline)),
                 ImageLayer image => jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.addImageLayer", mapId, image, CreateLayerReference(mapId, image)),
                 GeoJsonDataLayer geo => jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.addGeoJsonLayer", mapId, geo, CreateLayerReference(mapId, geo)),
                 _ => throw new NotImplementedException($"The layer {layer.GetType().Name} has not been implemented."),
@@ -60,26 +60,50 @@ namespace BlazorLeaflet
             if (marker.JsRef == null)
                 await RegisterAsync(jsRuntime, marker);
             await jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.addNewMarker",
-                //mapId, marker,CreateLayerReference(mapId, marker),marker.Icon as DivIcon
-                mapId,marker.Id,marker.JsRef
-                );
-            //marker.JsRef = js_ref;
+                mapId, marker.Id, marker.JsRef
+            );
         }
-        internal static async ValueTask RegisterAsync(IJSRuntime jsRuntime, Marker marker)
+
+        private static async ValueTask addPolylineAsync(IJSRuntime jsRuntime, string mapId, Polyline polyline)
         {
-            var js_ref = await jsRuntime.InvokeAsync<IJSObjectReference>($"{BaseObjectContainer}.createMarker", 
-                marker, marker.DotNetRef, marker.Icon as DivIcon);
-            marker.JsRef = js_ref;
+            if (polyline.JsRef == null)
+                await RegisterAsync(jsRuntime, polyline);
+            await jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.addNewPolyline",
+                mapId, polyline.Id, polyline.JsRef
+            );
         }
+
+        internal static async ValueTask RegisterAsync(IJSRuntime jsRuntime, Layer layer)
+        {
+            IJSObjectReference js_ref;
+            switch (layer)
+            {
+                case Marker marker:
+                    js_ref = await jsRuntime.InvokeAsync<IJSObjectReference>($"{BaseObjectContainer}.createNewMarker",
+                        marker, marker.DotNetRef, marker.Icon as DivIcon);
+                    break;
+                case Polyline polyline:
+                    js_ref = await jsRuntime.InvokeAsync<IJSObjectReference>($"{BaseObjectContainer}.createNewPolyline",
+                        polyline, polyline.DotNetRef);
+                    break;
+                default: throw new NotImplementedException();
+            }
+
+            layer.JsRef = js_ref;
+        }
+
+
         public static ValueTask OpenPopupOnMapAsync(IJSRuntime jsRuntime, string mapId, Popup popup)
         {
             return jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.openPopupOnMap", mapId, popup, CreateLayerReference(mapId, popup));
         }
+
         public static async ValueTask ClosePopupOnMapAsync(IJSRuntime jsRuntime, string mapId, Popup popup)
         {
             await jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.closePopupOnMap", mapId, popup);
             DisposeLayerReference(popup.Id);
         }
+
         public static async ValueTask RemoveLayer(IJSRuntime jsRuntime, string mapId, string layerId)
         {
             await jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.removeLayer", mapId, layerId);
@@ -92,9 +116,9 @@ namespace BlazorLeaflet
         public static ValueTask UpdateTooltipContent(IJSRuntime jsRuntime, string mapId, Layer layer) =>
             jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.updateTooltipContent", mapId, layer.Id, layer.Tooltip?.Content);
 
-        public static ValueTask SetLatLngAsync(IJSRuntime jsRuntime,string mapId, Marker marker, LatLng position)
+        public static ValueTask SetLatLngAsync(IJSRuntime jsRuntime, string mapId, Marker marker, LatLng position)
         {
-                return jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.setLatLng", mapId, marker, position);
+            return jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.setLatLng", mapId, marker, position);
         }
 
         public static ValueTask UpdateShape(IJSRuntime jsRuntime, string mapId, Layer layer) =>
@@ -124,6 +148,5 @@ namespace BlazorLeaflet
 
         public static ValueTask ZoomOut(IJSRuntime jsRuntime, string mapId, MouseEventArgs e) =>
             jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.zoomOut", mapId, e);
-
     }
 }

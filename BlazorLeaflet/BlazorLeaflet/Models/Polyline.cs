@@ -1,4 +1,6 @@
 ﻿using System.Drawing;
+using System.Threading.Tasks;
+using Microsoft.JSInterop;
 
 namespace BlazorLeaflet.Models
 {
@@ -20,7 +22,15 @@ namespace BlazorLeaflet.Models
     }
 
     public class Polyline : Polyline<PointF[][]>
-    { }
+    {
+        
+        public async ValueTask<Polyline> RegisterAsync(IJSRuntime jsRuntime)
+        {
+            await LeafletInterops.RegisterAsync(jsRuntime, this).ConfigureAwait(false);
+            return this;
+        }
+        
+    }
 
 
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BlazorLeaflet.Models
 {
-    public class Marker : InteractiveLayer,IAsyncDisposable,ILayer
+    public class Marker : InteractiveLayer
     {
 
         /// <summary>
@@ -78,10 +78,6 @@ namespace BlazorLeaflet.Models
         /// </summary>
         public int AutoPanSpeed { get; set; } = 10;
 
-        public IJSObjectReference JsRef { get; set; }
-        public DotNetObjectReference<Marker> DotNetRef { get; }
-
-
         public delegate void DragEventHandler(Marker sender, DragEvent e);
 
         public event DragEventHandler OnMove;
@@ -139,7 +135,6 @@ namespace BlazorLeaflet.Models
         public Marker(LatLng latLng)
         {
             Position = latLng;
-            DotNetRef = DotNetObjectReference.Create(this);
         }
 
         public Marker(float x, float y) : this(new LatLng(x, y)) { }
@@ -160,9 +155,6 @@ namespace BlazorLeaflet.Models
 
         public override async ValueTask DisposeAsync()
         {
-            DotNetRef.Dispose();
-            await JsRef.DisposeAsync();
-
             OnMove = null;
             OnDragStart = null;
             OnMoveStart = null;

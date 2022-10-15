@@ -6,8 +6,12 @@ using Microsoft.JSInterop;
 
 namespace BlazorLeaflet.Models
 {
-    public abstract class Layer : IAsyncDisposable
+    public abstract class Layer : IAsyncDisposable,ILayer
     {
+        public IJSObjectReference JsRef { get; set; }
+        public DotNetObjectReference<Layer> DotNetRef { get; }
+
+
         /// <summary>
         /// Unique identifier used by the interoperability service on the client side to identify layers.
         /// </summary>
@@ -91,19 +95,23 @@ namespace BlazorLeaflet.Models
         protected Layer()
         {
             Id = StringHelper.GetRandomString(20);
+            DotNetRef = DotNetObjectReference.Create(this);
         }
 
-        public virtual ValueTask DisposeAsync()
+        public virtual async ValueTask DisposeAsync()
         {
+            DotNetRef.Dispose();
+            await JsRef.DisposeAsync();
+
             OnAdd = null;
             OnRemove = null;
             OnPopupOpen = null;
             OnPopupClose = null;
             OnTooltipOpen = null;
             OnTooltipClose = null;
-            
-            return ValueTask.CompletedTask;
         }
+        
+        
     }
 }
 

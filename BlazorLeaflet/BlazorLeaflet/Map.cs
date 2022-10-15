@@ -67,6 +67,7 @@ namespace BlazorLeaflet
 
         private bool _isInitialized;
         private readonly List<ILayer> newLayers;
+        public IEnumerable<ILayer> NewLayers => this.newLayers;
 
         public Map(IJSRuntime jsRuntime)
         {
@@ -318,6 +319,13 @@ namespace BlazorLeaflet
         
         public async ValueTask AddNewLayerAsync(ILayer layer)
         {
+            if (layer.JsRef == null)
+            {
+                if (layer is Layer l)
+                    await LeafletInterops.RegisterAsync(JsRuntime, l);
+                else
+                    throw new ArgumentException("Layer is not registered");
+            }
             this.newLayers.Add(layer);
             await JsRuntime.InvokeVoidAsync($"{LeafletInterops.BaseObjectContainer}.addNewLayer",
                 JsRef,layer.JsRef);
