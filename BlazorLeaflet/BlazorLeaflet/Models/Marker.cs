@@ -141,10 +141,13 @@ namespace BlazorLeaflet.Models
 
         public Marker(PointF position) : this(position.X, position.Y) { }
 
-        public async ValueTask SetLatLngAsync(Map map, LatLng coords)
+        public async ValueTask SetLatLngAsync(IJSRuntime jsRuntime, LatLng coords)
         {
-            await LeafletInterops.SetLatLngAsync(map.JsRuntime, map.Id, this, coords);
             Position = coords;
+            if (this.JsRef == null)
+                await RegisterAsync(jsRuntime);
+            await JsRef.InvokeVoidAsync("setLatLng", coords);
+//            await LeafletInterops.SetLatLngAsync(map.JsRuntime, map.Id, this, coords);
         }
 
         public async ValueTask<Marker> RegisterAsync(IJSRuntime jsRuntime)
