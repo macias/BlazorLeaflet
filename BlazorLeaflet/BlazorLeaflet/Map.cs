@@ -190,14 +190,16 @@ namespace BlazorLeaflet
         /// 
         /// If <c>shift</c> is held down, increases it by three.
         /// </summary>
-        public async Task ZoomIn(MouseEventArgs e) => await LeafletInterops.ZoomIn(JsRuntime, Id, e);
+        public async Task ZoomInAsync(MouseEventArgs e) => await LeafletInterops.ZoomInAsync(JsRuntime, Id, e);
 
         /// <summary>
         /// Decreases the zoom level by one notch.
         /// 
         /// If <c>shift</c> is held down, decreases it by three.
         /// </summary>
-        public async Task ZoomOut(MouseEventArgs e) => await LeafletInterops.ZoomOut(JsRuntime, Id, e);
+        public async Task ZoomOutAsync(MouseEventArgs e) => await LeafletInterops.ZoomOutAsync(JsRuntime, Id, e);
+
+        public ValueTask InvalidateSizeAsync() => LeafletInterops.InvalidateSizeAsync(JsRuntime, Id);
 
         public delegate void MapEventHandler(object sender, Event e);
         public delegate void MapResizeEventHandler(object sender, ResizeEvent e);

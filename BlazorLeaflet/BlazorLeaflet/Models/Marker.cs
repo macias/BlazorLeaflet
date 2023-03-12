@@ -1,5 +1,4 @@
-﻿using System;
-using BlazorLeaflet.Models.Events;
+﻿using BlazorLeaflet.Models.Events;
 using Microsoft.JSInterop;
 using System.Drawing;
 using System.Threading.Tasks;

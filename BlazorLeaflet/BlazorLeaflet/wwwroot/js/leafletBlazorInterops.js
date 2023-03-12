@@ -306,6 +306,10 @@ window.leafletBlazor = {
         if (map.getZoom() > map.getMinZoom()) {
             map.zoomOut(map.options.zoomDelta * (e.shiftKey ? 3 : 1));
         }
+    },
+    invalidateSize: function (mapId) {
+        const map = maps[mapId];
+        map.invalidateSize();
     }
 };
 

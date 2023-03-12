@@ -143,10 +143,14 @@ namespace BlazorLeaflet
         public static ValueTask<float> GetZoom(IJSRuntime jsRuntime, string mapId) =>
             jsRuntime.InvokeAsync<float>($"{BaseObjectContainer}.getZoom", mapId);
 
-        public static ValueTask ZoomIn(IJSRuntime jsRuntime, string mapId, MouseEventArgs e) =>
+        public static ValueTask ZoomInAsync(IJSRuntime jsRuntime, string mapId, MouseEventArgs e) =>
             jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.zoomIn", mapId, e);
 
-        public static ValueTask ZoomOut(IJSRuntime jsRuntime, string mapId, MouseEventArgs e) =>
+        public static ValueTask ZoomOutAsync(IJSRuntime jsRuntime, string mapId, MouseEventArgs e) =>
             jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.zoomOut", mapId, e);
+        
+        public static ValueTask InvalidateSizeAsync(IJSRuntime jsRuntime, string mapId) =>
+            jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.invalidateSize", mapId);
+        
     }
 }
