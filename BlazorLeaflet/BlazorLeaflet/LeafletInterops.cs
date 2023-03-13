@@ -16,7 +16,7 @@ namespace BlazorLeaflet
 
         internal static readonly string BaseObjectContainer = "window.leafletBlazor";
 
-        public static async ValueTask Create(IJSRuntime jsRuntime, Map map)
+        public static async ValueTask CreateAsync(IJSRuntime jsRuntime, Map map)
         {
             var js_ref = await jsRuntime.InvokeAsync<IJSObjectReference>($"{BaseObjectContainer}.create", map, DotNetObjectReference.Create(map));
             map.JsRef = js_ref;

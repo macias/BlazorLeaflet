@@ -12,7 +12,7 @@
     {
         if (firstRender)
         {
-            await LeafletInterops.Create(JsRuntime, Map);
+            await LeafletInterops.CreateAsync(JsRuntime, Map);
             Map.RaiseOnInitialized();
         }
     }
