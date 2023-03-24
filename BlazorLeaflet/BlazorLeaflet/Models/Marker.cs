@@ -148,12 +148,7 @@ namespace BlazorLeaflet.Models
             await JsRef.InvokeVoidAsync("setLatLng", coords);
 //            await LeafletInterops.SetLatLngAsync(map.JsRuntime, map.Id, this, coords);
         }
-
-        public async ValueTask<Marker> RegisterAsync(IJSRuntime jsRuntime)
-        {
-            await LeafletInterops.RegisterAsync(jsRuntime, this).ConfigureAwait(false);
-            return this;
-        }
+      
 
         public override async ValueTask DisposeAsync()
         {

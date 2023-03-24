@@ -111,7 +111,21 @@ namespace BlazorLeaflet.Models
             OnTooltipClose = null;
         }
         
+        public async ValueTask<Layer> RegisterAsync(IJSRuntime jsRuntime)
+        {
+            await LeafletInterops.RegisterAsync(jsRuntime, this).ConfigureAwait(false);
+            return this;
+        }
         
+        public async ValueTask SetTooltipContentAsync(IJSRuntime jsRuntime, string content)
+        {
+                Tooltip.Content = content;
+            if (this.JsRef == null)
+                await RegisterAsync(jsRuntime).ConfigureAwait(false);
+            await LeafletInterops.UpdateTooltipContentAsync(jsRuntime, this).ConfigureAwait(false);
+        }
+
+
     }
 }
 

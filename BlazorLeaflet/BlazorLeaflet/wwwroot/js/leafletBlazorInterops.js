@@ -260,8 +260,9 @@ window.leafletBlazor = {
             }
         }
     },
-    updateTooltipContent: function (mapId, layerId, content) {
-        let layer = layers[mapId].find(l => l.id === layerId);
+//    updateTooltipContent: function (mapId, layerId, content) {
+  //      let layer = layers[mapId].find(l => l.id === layerId);
+    updateTooltipContent: function (layer, content) {
         if (layer !== undefined) {
             var tooltip = layer.getTooltip();
             if (tooltip !== undefined) {
@@ -398,9 +399,17 @@ function unbindTooltipAndPopupIfDefined(layer) {
 }
 
 function setTooltipAndPopupIfDefined(layer, jsLayer) {
+    setTooltipIfDefined(layer,jsLayer);
+    setPopupIfDefined(layer,jsLayer);
+}
+
+function setTooltipIfDefined(layer, jsLayer) {
     if (layer.tooltip) {
         addTooltip(jsLayer, layer.tooltip);
     }
+}
+
+function setPopupIfDefined(layer, jsLayer) {
     if (layer.popup) {
         addPopup(jsLayer, layer.popup);
     }
