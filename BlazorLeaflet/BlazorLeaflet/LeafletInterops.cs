@@ -136,7 +136,7 @@ namespace BlazorLeaflet
         public static ValueTask FitBounds(IJSRuntime jsRuntime, string mapId, PointF corner1, PointF corner2, PointF? padding, float? maxZoom) =>
             jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.fitBounds", mapId, corner1, corner2, padding, maxZoom);
 
-        public static ValueTask PanTo(IJSRuntime jsRuntime, string mapId, PointF position, bool animate, float duration, float easeLinearity, bool noMoveStart) =>
+        public static ValueTask PanToAsync(IJSRuntime jsRuntime, string mapId, PointF position, bool animate, float duration, float easeLinearity, bool noMoveStart) =>
             jsRuntime.InvokeVoidAsync($"{BaseObjectContainer}.panTo", mapId, position, animate, duration, easeLinearity, noMoveStart);
 
         public static ValueTask<LatLng> GetCenter(IJSRuntime jsRuntime, string mapId) =>

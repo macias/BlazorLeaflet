@@ -176,21 +176,21 @@ namespace BlazorLeaflet
             LeafletInterops.FitBounds(JsRuntime, Id, corner1, corner2, padding, maxZoom);
         }
 
-        public void PanTo(PointF position, bool animate = false, float duration = 0.25f, float easeLinearity = 0.25f, bool noMoveStart = false)
+        public ValueTask PanToAsync(PointF position, bool animate = false, float duration = 0.25f,
+            float easeLinearity = 0.25f, bool noMoveStart = false)
         {
-            LeafletInterops.PanTo(JsRuntime, Id, position, animate, duration, easeLinearity, noMoveStart);
+            return LeafletInterops.PanToAsync(JsRuntime, Id, position, animate, duration, easeLinearity, noMoveStart);
         }
 
-        public async Task<LatLng> GetCenter() => await LeafletInterops.GetCenter(JsRuntime, Id);
-        public async Task<float> GetZoom() => 
-            await LeafletInterops.GetZoom(JsRuntime, Id);
+        public ValueTask<LatLng> GetCenterAsync() => LeafletInterops.GetCenter(JsRuntime, Id);
+        public ValueTask<float> GetZoomAsync() => LeafletInterops.GetZoom(JsRuntime, Id);
 
         /// <summary>
         /// Increases the zoom level by one notch.
         /// 
         /// If <c>shift</c> is held down, increases it by three.
         /// </summary>
-        public async Task ZoomInAsync(MouseEventArgs e) => await LeafletInterops.ZoomInAsync(JsRuntime, Id, e);
+        public ValueTask ZoomInAsync(MouseEventArgs e) => LeafletInterops.ZoomInAsync(JsRuntime, Id, e);
 
         /// <summary>
         /// Decreases the zoom level by one notch.
